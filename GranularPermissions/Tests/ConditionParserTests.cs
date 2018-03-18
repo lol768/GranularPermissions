@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using GranularPermissions.Conditions;
 using GranularPermissions.Tests.Stubs;
 using Loyc.Syntax;
 using Loyc.Syntax.Les;

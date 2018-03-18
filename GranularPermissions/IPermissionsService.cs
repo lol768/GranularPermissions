@@ -6,7 +6,7 @@ namespace GranularPermissions
     {
         void InsertSerialized(IPermissionGrantSerialized serialized);
 
-        PermissionResult GetResultUsingChain(string chainName, INode nodeToResolve, int identifier,
+        PermissionResult GetResultUsingChain(string chainName, INode permissionToCheck, int identifier,
             IPermissionManaged resource = null);
 
         IDictionary<string, INode> GetDefinedNodes();

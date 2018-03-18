@@ -1,9 +1,7 @@
-﻿using System;
-using System.Net.Http;
-using Loyc.Syntax;
+﻿using Loyc.Syntax;
 using Loyc.Syntax.Les;
 
-namespace GranularPermissions
+namespace GranularPermissions.Conditions
 {
     public class ConditionParser : IConditionParser
     {

@@ -1,4 +1,5 @@
 ﻿using System;
+using GranularPermissions.Conditions;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace GranularPermissions.Mvc
@@ -11,6 +12,7 @@ namespace GranularPermissions.Mvc
             collection.AddTransient<IPermissionsScanner, PermissionsScanner>();
             collection.AddScoped<IConditionEvaluator, ConditionEvaluator>();
             collection.AddScoped<IConditionParser, ConditionParser>();
+            collection.AddScoped<IPermissionAuditLogCollector, PermissionAuditLogCollector>();
             collection.AddSingleton<IPermissionsService>(sp =>
             {
                 var dictionary = sp.GetService<IPermissionsScanner>().All(basePermissionsClass);

@@ -12,13 +12,12 @@ namespace GranularPermissions.Mvc.Tests
     [TestFixture]
     public class ExtensionMethodTests
     {
-        
         [Test]
         public void TestServiceCollectionExtensionMethod()
         {
             // arrange
             var sut = new ServiceCollection();
-            
+
             // act
             sut.AddScoped<IPermissionGrantProvider, PermissionGrantProviderStub>();
             sut.AddGranularPermissions(typeof(PermissionsStub));
@@ -27,15 +26,21 @@ namespace GranularPermissions.Mvc.Tests
             var sp = sut.BuildServiceProvider();
             var permissionsService = sp.GetService<IPermissionsService>();
             permissionsService.ShouldNotBeNull();
-            var result = permissionsService.GetResultUsingChain("Users", PermissionsStub.Cat.Pet, 1, new Cat
-            {
-                Breed = CatBreed.Bengal,
-                DateOfBirth = DateTime.UtcNow,
-                Name = "Felix"
-            });
+
+            var result = permissionsService.GetResultUsingChain(
+                chainName: "Users",
+                permissionToCheck: PermissionsStub.Cat.Pet,
+                identifier: 1,
+                resource: new Cat
+                {
+                    Breed = CatBreed.Bengal,
+                    DateOfBirth = DateTime.UtcNow,
+                    Name = "Felix"
+                }
+            );
+            
             result.ShouldBe(PermissionResult.Allowed);
         }
-
     }
 
     class PermissionGrantProviderStub : IPermissionGrantProvider
@@ -57,5 +62,4 @@ namespace GranularPermissions.Mvc.Tests
             };
         }
     }
-
 }

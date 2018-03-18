@@ -1,6 +1,6 @@
 ﻿using Loyc.Syntax;
 
-namespace GranularPermissions
+namespace GranularPermissions.Conditions
 {
     public interface IConditionEvaluator
     {

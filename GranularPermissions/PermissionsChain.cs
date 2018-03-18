@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using GranularPermissions.Conditions;
 
 namespace GranularPermissions
 {
@@ -27,12 +28,13 @@ namespace GranularPermissions
             _entries[identifier] = queue;
         }
 
-        public PermissionResult ResolvePermission(INode nodeToResolve, int identifier, IPermissionManaged resource = null)
+        public (PermissionResult, IEnumerable<PermissionDecision>) ResolvePermission(INode nodeToResolve, int identifier, IPermissionManaged resource = null)
         {
             var result = PermissionResult.Unset;
+            var considered = new List<PermissionDecision>();
             if (!_entries.ContainsKey(identifier))
             {
-                return result;
+                return (result, considered);
             }
 
             var items = _entries[identifier];
@@ -42,8 +44,6 @@ namespace GranularPermissions
                 var grant = keyValuePair.Value;
                 if (grant.PermissionType == PermissionType.Generic)
                 {
-                    Console.WriteLine("Setting to " + grant.GrantType == GrantType.Allow + " due to generic grant");
-
                     switch (grant.GrantType)
                     {
                         case GrantType.Allow:
@@ -53,6 +53,7 @@ namespace GranularPermissions
                             result = PermissionResult.Denied;
                             break;
                     }
+                    considered.Add(new PermissionDecision(grant, result, true));
                 }
                 else
                 {
@@ -68,15 +69,21 @@ namespace GranularPermissions
                         case GrantType.Allow when conditionsSatisfied:
                             Console.WriteLine("Allowing due to satisfied conditions");
                             result = PermissionResult.Allowed;
+                            considered.Add(new PermissionDecision(grant, result, conditionsSatisfied));
                             break;
                         case GrantType.Deny when conditionsSatisfied:
                             Console.WriteLine("Denying due to satisfied conditions");
                             result = PermissionResult.Denied;
+                            considered.Add(new PermissionDecision(grant, result, conditionsSatisfied));
+                            break;
+                        default:
+                            considered.Add(new PermissionDecision(grant, PermissionResult.Unset, conditionsSatisfied));
                             break;
                     }
+                    
                 }
             }
-            return result;
+            return (result, considered);
         }
     }
 }

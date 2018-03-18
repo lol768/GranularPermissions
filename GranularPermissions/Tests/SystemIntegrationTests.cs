@@ -1,4 +1,5 @@
 ﻿using System;
+using GranularPermissions.Conditions;
 using GranularPermissions.Tests.Stubs;
 using NUnit.Framework;
 using NUnit.Framework.Constraints;

@@ -4,7 +4,7 @@ using System.Data;
 using System.Linq;
 using Loyc.Syntax;
 
-namespace GranularPermissions
+namespace GranularPermissions.Conditions
 {
     /// <summary>
     /// Evaluates parsed conditions.

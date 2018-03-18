@@ -2,23 +2,25 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using GranularPermissions.Models;
 using Loyc.Syntax;
-using Loyc.Syntax.Les;
-using NUnit.Framework.Constraints;
 
 namespace GranularPermissions
 {
+    /// <summary>
+    /// Evaluates parsed conditions.
+    /// 
+    /// Do not use across multiple threads at the same time.
+    /// </summary>
     public class ConditionEvaluator : IConditionEvaluator
     {
+        private const string ResourceIdentifierName = "resource";
         private IDictionary<string, Func<object>> IdentifierTable = new Dictionary<string, Func<object>>();
 
         private IDictionary<string, Func<ICollection<LNode>, LNode>> FunctionTable =
             new Dictionary<string, Func<ICollection<LNode>, LNode>>();
 
-        // TODO: investigate thread safety
         private LNodeFactory _factory;
+        private int _stackOverflowLimit;
 
         public ConditionEvaluator()
         {
@@ -27,39 +29,37 @@ namespace GranularPermissions
                 return _factory.Literal(args.Aggregate(true,
                     (current, arg) => current & (bool) ResolveLiteral(arg).Value));
             };
-            
+
             FunctionTable["'||"] = args =>
             {
-                return _factory.Literal(args.Aggregate(true,
+                return _factory.Literal(args.Aggregate(false,
                     (current, arg) => current | (bool) ResolveLiteral(arg).Value));
             };
 
             FunctionTable["'>"] = args =>
             {
-                EnsureBinaryFunctionArguments(args);
-                var left = ResolveLiteral(args.First()).Value as IComparable;
-                var right = ResolveLiteral(args.Last()).Value as IComparable;
-                if (left == null || right == null)
-                {
-                    throw new ArgumentException("Arguments are not comparable!");
-                }
-
-                return _factory.Literal(left.CompareTo(right) > 0);
+                var tuple = GetComparableArguments(args);
+                return _factory.Literal(tuple.Item1.CompareTo(tuple.Item2) > 0);
             };
-            
+
             FunctionTable["'<"] = args =>
             {
-                EnsureBinaryFunctionArguments(args);
-                var left = ResolveLiteral(args.First()).Value as IComparable;
-                var right = ResolveLiteral(args.Last()).Value as IComparable;
-                if (left == null || right == null)
-                {
-                    throw new ArgumentException("Arguments are not comparable!");
-                }
-
-                return _factory.Literal(left.CompareTo(right) < 0);
+                var tuple = GetComparableArguments(args);
+                return _factory.Literal(tuple.Item1.CompareTo(tuple.Item2) < 0);
             };
-            
+
+            FunctionTable["'>="] = args =>
+            {
+                var tuple = GetComparableArguments(args);
+                return _factory.Literal(tuple.Item1.CompareTo(tuple.Item2) >= 0);
+            };
+
+            FunctionTable["'<="] = args =>
+            {
+                var tuple = GetComparableArguments(args);
+                return _factory.Literal(tuple.Item1.CompareTo(tuple.Item2) <= 0);
+            };
+
             FunctionTable["'=="] = args =>
             {
                 EnsureBinaryFunctionArguments(args);
@@ -68,7 +68,7 @@ namespace GranularPermissions
 
                 return _factory.Literal(left.Equals(right));
             };
-            
+
             FunctionTable["'!="] = args =>
             {
                 EnsureBinaryFunctionArguments(args);
@@ -77,14 +77,25 @@ namespace GranularPermissions
 
                 return _factory.Literal(!left.Equals(right));
             };
-            
+
+            FunctionTable["'!"] = args =>
+            {
+                EnsureSingleFunctionArgument(args);
+                var operand = ResolveLiteral(args.First()).Value;
+                if (!(operand is bool))
+                {
+                    throw new InvalidOperationException("Attempt to negate a non-boolean value. This is not JavaScript.");
+                }
+                return _factory.Literal(!((bool)operand));
+            };
+
             FunctionTable["'."] = args =>
             {
                 EnsureBinaryFunctionArguments(args);
 
                 var literalLeft = ResolveLiteral(args.First()).Value;
                 var identifierRight = (args.Last()).Name.Name;
-                
+
                 if (literalLeft.GetType().GetProperty(identifierRight) != null)
                 {
                     return _factory.Literal(literalLeft.GetType().GetProperty(identifierRight).GetValue(literalLeft));
@@ -94,22 +105,43 @@ namespace GranularPermissions
                 {
                     throw new ArgumentException("Method calls prohibted due to RCE risk.");
                 }
-                throw new ArgumentException($"Couldn't find a {identifierRight} on the provided {literalLeft.GetType().Name}");
-            };
 
-            IdentifierTable["product"] = () => new Product
-            {
-                Name = "Americano",
-                Price = 3.0d,
-                Category = new Category()
+                throw new ArgumentException(
+                    $"Couldn't find a {identifierRight} on the provided {literalLeft.GetType().Name}");
             };
 
             IdentifierTable["isOwned"] = () => true;
+
+            IdentifierTable["true"] = () => true;
+            IdentifierTable["false"] = () => false;
+        }
+
+        private (IComparable, IComparable) GetComparableArguments(ICollection<LNode> args)
+        {
+            EnsureBinaryFunctionArguments(args);
+            var left = ResolveLiteral(args.First()).Value as IComparable;
+            var right = ResolveLiteral(args.Last()).Value as IComparable;
+            if (left == null || right == null)
+            {
+                throw new ArgumentException("Arguments are not comparable!");
+            }
+
+            return (left, right);
+        }
+        
+        private static void EnsureSingleFunctionArgument(ICollection<LNode> args)
+        {
+            AssertNumberOfArguments(args, 1);
         }
 
         private static void EnsureBinaryFunctionArguments(ICollection<LNode> args)
         {
-            if (args.Count != 2)
+            AssertNumberOfArguments(args, 2);
+        }
+
+        private static void AssertNumberOfArguments(ICollection<LNode> args, int desired)
+        {
+            if (args.Count != desired)
             {
                 throw new ArgumentException($"Function call had {args.Count} arguments instead of 2");
             }
@@ -117,10 +149,9 @@ namespace GranularPermissions
 
         private LiteralNode ResolveLiteral(LNode input)
         {
-            var stackOverflowLimit = 10;
-            while (stackOverflowLimit > 0)
+            while (_stackOverflowLimit > 0)
             {
-                stackOverflowLimit--;
+                _stackOverflowLimit--;
                 if (input.IsLiteral)
                 {
                     return input as LiteralNode;
@@ -142,7 +173,8 @@ namespace GranularPermissions
                 {
                     if (FunctionTable.ContainsKey(input.Name.Name))
                     {
-                        return ResolveLiteral(FunctionTable[input.Name.Name](input.Args));
+                        input = FunctionTable[input.Name.Name](input.Args);
+                        continue;
                     }
 
                     throw new InvalidExpressionException(
@@ -158,6 +190,9 @@ namespace GranularPermissions
         public bool Evaluate(IPermissionManaged resource, LNode parsedNode)
         {
             _factory = new LNodeFactory(parsedNode.Source);
+            _stackOverflowLimit = 10;
+
+            IdentifierTable[ResourceIdentifierName] = () => resource;
             var result = ResolveLiteral(parsedNode);
             return (bool) result.Value;
         }

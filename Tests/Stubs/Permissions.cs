@@ -1,7 +1,6 @@
-﻿using static GranularPermissions.PermissionType;
-using ProductModel = GranularPermissions.Models.Product;
+﻿using ProductModel = GranularPermissions.Tests.Stubs.Product;
 
-namespace GranularPermissions
+namespace GranularPermissions.Tests.Stubs
 {
     public static class Permissions
     {
@@ -15,6 +14,15 @@ namespace GranularPermissions
             
             public static readonly ResourceNode<ProductModel> Buy =
                 new ResourceNode<ProductModel>("Product.Purchase", "Purchase an individual product");
+        }
+        
+        public static class Cat
+        {
+            public static readonly ResourceNode<ProductModel> Pet =
+                new ResourceNode<ProductModel>("Cat.Pet", "Pet the cat without being bitten/scratched");
+            
+            public static readonly GenericNode Adopt =
+                new GenericNode("Cat.Adopt", "Be adopted by a cat");
         }
     }
 }

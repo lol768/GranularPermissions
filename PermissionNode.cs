@@ -8,8 +8,12 @@ namespace GranularPermissions
         string Key { get; }
         string Description { get; }
     }
+     
+    public interface IResourceNode : INode
+    {
+    }
     
-    public class ResourceNode<T> : INode where T : IPermissionManaged
+    public class ResourceNode<T> : IResourceNode where T : IPermissionManaged
     {
         public ResourceNode(string key, string description)
         {

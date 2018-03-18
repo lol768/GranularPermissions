@@ -1,4 +1,4 @@
-﻿namespace GranularPermissions.Models
+﻿namespace GranularPermissions.Tests.Stubs
 {
     public class Product : IPermissionManaged
     {
@@ -13,6 +13,7 @@
 
     public class Category
     {
-        public int CategoryId => 5;
+        public int CategoryId { get; set; }
+        public Product ProductReference { get; set; }
     }
 }

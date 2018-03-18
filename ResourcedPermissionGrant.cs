@@ -9,6 +9,8 @@ namespace GranularPermissions
         PermissionType PermissionType { get; }
         GrantType GrantType { get; }
         int Index { get; }
+        //INode UnderlyingNode { get; } - C# has no return type covariance! :(
+        bool IsFor(INode node);
     }
 
     public class ResourcedPermissionGrant<T> : IPermissionGrant where T : IPermissionManaged
@@ -16,10 +18,17 @@ namespace GranularPermissions
         public PermissionType PermissionType { get; }
         public GrantType GrantType { get; }
         public int Index { get; }
-        public ResourceNode<T> UnderlyingNode { get; }
+
+        public IResourceNode UnderlyingNode { get; }
+        
+        public bool IsFor(INode node)
+        {
+            return node.Key == UnderlyingNode.Key;
+        }
+        
         public LNode Condition { get; }
 
-        public ResourcedPermissionGrant(GrantType grantType, ResourceNode<T> underlyingNode, LNode condition, int index)
+        public ResourcedPermissionGrant(GrantType grantType, IResourceNode underlyingNode, LNode condition, int index)
         {
             GrantType = grantType;
             Condition = condition;
@@ -54,6 +63,11 @@ namespace GranularPermissions
             UnderlyingNode = underlyingNode;
             Index = index;
             PermissionType = PermissionType.Generic;
+        }
+        
+        public bool IsFor(INode node)
+        {
+            return node.Key == UnderlyingNode.Key;
         }
 
         public int CompareTo(IPermissionGrant other)

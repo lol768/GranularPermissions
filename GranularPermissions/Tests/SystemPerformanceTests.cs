@@ -30,8 +30,10 @@ namespace GranularPermissions.Tests
                 GrantType = GrantType.Allow,
                 Index = i++,
                 NodeKey = Permissions.Product.View.Key,
-                PermissionType = PermissionType.ResourceBound
-            }, 1, "Users");
+                PermissionType = PermissionType.ResourceBound,
+                Identifier = 1,
+                PermissionChain = "Users"
+            });
         }
     }
 }

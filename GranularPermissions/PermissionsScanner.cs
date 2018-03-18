@@ -6,7 +6,7 @@ using System.Reflection.Metadata;
 
 namespace GranularPermissions
 {
-    class PermissionsScanner : IPermissionsScanner
+    public class PermissionsScanner : IPermissionsScanner
     {
         public IDictionary<string, INode> All(Type enclosingClass)
         {

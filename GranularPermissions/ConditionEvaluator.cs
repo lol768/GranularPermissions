@@ -189,12 +189,15 @@ namespace GranularPermissions
 
         public bool Evaluate(IPermissionManaged resource, LNode parsedNode)
         {
-            _factory = new LNodeFactory(parsedNode.Source);
-            _stackOverflowLimit = 10;
+            lock (IdentifierTable)
+            {
+                _factory = new LNodeFactory(parsedNode.Source);
+                _stackOverflowLimit = 10;
 
-            IdentifierTable[ResourceIdentifierName] = () => resource;
-            var result = ResolveLiteral(parsedNode);
-            return (bool) result.Value;
+                IdentifierTable[ResourceIdentifierName] = () => resource;
+                var result = ResolveLiteral(parsedNode);
+                return (bool) result.Value;
+            }   
         }
     }
 }

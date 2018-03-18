@@ -8,7 +8,9 @@ namespace GranularPermissions.Tests
 {
     [TestFixture]
     public class SystemIntegrationTests
-    { 
+    {
+        private const string PermissionChainName = "Users";
+
         [Test]
         public void TestIntegrationWithResourceBounds()
         {
@@ -21,8 +23,10 @@ namespace GranularPermissions.Tests
                 GrantType = GrantType.Allow,
                 Index = 1,
                 NodeKey = Permissions.Product.View.Key,
-                PermissionType = PermissionType.ResourceBound
-            }, 1, "Users");
+                PermissionType = PermissionType.ResourceBound,
+                Identifier = 1,
+                PermissionChain = PermissionChainName
+            });
             
             sut.InsertSerialized(new GrantStub
             {
@@ -30,13 +34,15 @@ namespace GranularPermissions.Tests
                 GrantType = GrantType.Deny,
                 Index = 2,
                 NodeKey = Permissions.Product.View.Key,
-                PermissionType = PermissionType.ResourceBound
-            }, 1, "Users");
+                PermissionType = PermissionType.ResourceBound,
+                Identifier = 1,
+                PermissionChain = PermissionChainName
+            });
 
             // We have an explicit grant, this should be true
-            sut.GetResultUsingTable("Users", Permissions.Product.View, 1, new Product()).ShouldBe(PermissionResult.Allowed);
+            sut.GetResultUsingChain(PermissionChainName, Permissions.Product.View, 1, new Product()).ShouldBe(PermissionResult.Allowed);
             
-            sut.GetResultUsingTable("Users", Permissions.Product.Buy, 1, new Product()).ShouldBe(PermissionResult.Unset);
+            sut.GetResultUsingChain(PermissionChainName, Permissions.Product.Buy, 1, new Product()).ShouldBe(PermissionResult.Unset);
         }
         
         [Test]
@@ -51,12 +57,14 @@ namespace GranularPermissions.Tests
                 Index = 1,
                 NodeKey = Permissions.Product.Create.Key,
                 PermissionType = PermissionType.Generic,
-            }, 1, "Users");
+                Identifier = 1,
+                PermissionChain = PermissionChainName
+            });
             
             // We have an explicit grant, this should be true
-            sut.GetResultUsingTable("Users", Permissions.Product.Create, 1).ShouldBe(PermissionResult.Allowed);
+            sut.GetResultUsingChain(PermissionChainName, Permissions.Product.Create, 1).ShouldBe(PermissionResult.Allowed);
             
-            sut.GetResultUsingTable("Users", Permissions.Product.Buy, 1, new Product()).ShouldBe(PermissionResult.Unset);
+            sut.GetResultUsingChain(PermissionChainName, Permissions.Product.Buy, 1, new Product()).ShouldBe(PermissionResult.Unset);
         }
         
         [Test]
@@ -73,7 +81,9 @@ namespace GranularPermissions.Tests
                     Index = 1,
                     NodeKey = Permissions.Product.Create.Key,
                     PermissionType = PermissionType.ResourceBound,
-                }, 1, "Users");
+                    Identifier = 1,
+                    PermissionChain = PermissionChainName
+                });
                 return true;
             };
             
@@ -94,7 +104,9 @@ namespace GranularPermissions.Tests
                     Index = 1,
                     NodeKey = "Dog.Feed",
                     PermissionType = PermissionType.ResourceBound,
-                }, 1, "Users");
+                    Identifier = 1,
+                    PermissionChain = PermissionChainName
+                });
                 return true;
             };
             

@@ -1,16 +1,14 @@
-﻿namespace GranularPermissions
+﻿using System.Collections.Generic;
+
+namespace GranularPermissions
 {
     public interface IPermissionsService
     {
-        void InsertSerialized(IPermissionGrantSerialized serialized, int identifier, string table);
-    }
+        void InsertSerialized(IPermissionGrantSerialized serialized);
 
-    public interface IPermissionGrantSerialized
-    {
-        string NodeKey { get; set; }
-        string ConditionCode { get; set; }
-        GrantType GrantType { get; set; }
-        PermissionType PermissionType { get; set; }
-        int Index { get; set; }
+        PermissionResult GetResultUsingChain(string chainName, INode nodeToResolve, int identifier,
+            IPermissionManaged resource = null);
+
+        IDictionary<string, INode> GetDefinedNodes();
     }
 }

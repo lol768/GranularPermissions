@@ -5,11 +5,11 @@ using System.Linq;
 
 namespace GranularPermissions
 {
-    public class PermissionsTable
+    public class PermissionsChain
     {
         private readonly IConditionEvaluator _evaluator;
 
-        public PermissionsTable(IConditionEvaluator evaluator)
+        public PermissionsChain(IConditionEvaluator evaluator)
         {
             _evaluator = evaluator;
         }

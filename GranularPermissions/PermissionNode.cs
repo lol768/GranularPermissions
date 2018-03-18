@@ -26,11 +26,6 @@ namespace GranularPermissions
         public string Key { get; }
         public string Description { get; }
 
-        public bool IsGranted(IPermissionsService service, T resourceToCheck)
-        {
-            return false;
-        }
-
         public override string ToString()
         {
             return $"ResourceBound[{typeof(T).Name}].{Key} = {Description}";
@@ -49,11 +44,6 @@ namespace GranularPermissions
         public PermissionType PermissionType { get; }
         public string Key { get; }
         public string Description { get; }
-        
-        public bool IsGranted(IPermissionsService service)
-        {
-            return false;
-        }
         
         public override string ToString()
         {

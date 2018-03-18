@@ -5,7 +5,7 @@ using Loyc.Syntax.Les;
 
 namespace GranularPermissions
 {
-    class ConditionParser : IConditionParser
+    public class ConditionParser : IConditionParser
     {
         public LNode ParseConditionCode(string code)
         {

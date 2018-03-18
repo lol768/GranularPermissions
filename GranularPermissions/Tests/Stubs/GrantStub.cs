@@ -7,5 +7,7 @@
         public GrantType GrantType { get; set; }
         public PermissionType PermissionType { get; set; }
         public int Index { get; set; }
+        public int Identifier { get; set; }
+        public string PermissionChain { get; set; }
     }
 }

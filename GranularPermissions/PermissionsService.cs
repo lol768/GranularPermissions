@@ -1,16 +1,17 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace GranularPermissions
 {
-    class PermissionsService : IPermissionsService
+    public class PermissionsService : IPermissionsService
     {
         private readonly IConditionParser _parser;
         private readonly IDictionary<string, INode> _nodeDefinitions;
         private readonly IConditionEvaluator _evaluator;
 
-        private IDictionary<string, PermissionsTable> Tables = new ConcurrentDictionary<string, PermissionsTable>();
+        private IDictionary<string, PermissionsChain> Chains = new ConcurrentDictionary<string, PermissionsChain>();
 
         public PermissionsService(IConditionParser parser, IDictionary<string, INode> nodeDefinitions,
             IConditionEvaluator evaluator)
@@ -20,26 +21,34 @@ namespace GranularPermissions
             _evaluator = evaluator;
         }
 
-        public PermissionResult GetResultUsingTable(string table, INode nodeToResolve, int identifier,
+        public PermissionResult GetResultUsingChain(string chainName, INode nodeToResolve, int identifier,
             IPermissionManaged resource = null)
         {
-            if (!Tables.ContainsKey(table))
+            if (!Chains.ContainsKey(chainName))
             {
-                throw new ArgumentException("Invalid supplied permissions table");
+                throw new ArgumentException("Invalid supplied permissions chain");
             }
-            return Tables[table].ResolvePermission(nodeToResolve, identifier, resource);
+            return Chains[chainName].ResolvePermission(nodeToResolve, identifier, resource);
         }
 
-        public void InsertSerialized(IPermissionGrantSerialized serialized, int identifier, string table)
+        public IDictionary<string, INode> GetDefinedNodes()
         {
-            var tableInstance = Tables.ContainsKey(table) ? Tables[table] : new PermissionsTable(_evaluator);
+            return new ReadOnlyDictionary<string, INode>(_nodeDefinitions);
+        }
+
+        public void InsertSerialized(IPermissionGrantSerialized serialized)
+        {
+            var chainName = serialized.PermissionChain;
+            var identifier = serialized.Identifier;
+            
+            var tableInstance = Chains.ContainsKey(chainName) ? Chains[chainName] : new PermissionsChain(_evaluator);
             if (!_nodeDefinitions.ContainsKey(serialized.NodeKey))
             {
                 throw new ArgumentException("No such permission node in definition list");
             }
             var potentialNode = _nodeDefinitions[serialized.NodeKey];
             
-            Tables[table] = tableInstance;
+            Chains[chainName] = tableInstance;
 
             if (serialized.PermissionType == PermissionType.Generic)
             {

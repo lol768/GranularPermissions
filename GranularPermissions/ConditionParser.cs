@@ -1,4 +1,6 @@
-﻿using Loyc.Syntax;
+﻿using System;
+using System.Net.Http;
+using Loyc.Syntax;
 using Loyc.Syntax.Les;
 
 namespace GranularPermissions

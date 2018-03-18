@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Exporters;
 using BenchmarkDotNet.Exporters.Csv;
@@ -8,7 +10,6 @@ using BenchmarkDotNet.Validators;
 
 namespace GranularPermissions
 {
-    
     public class Program
     {
         public static void Main(string[] args)
@@ -16,7 +17,7 @@ namespace GranularPermissions
             var summary = BenchmarkRunner.Run<SystemPerformanceTests>(new AllowNonOptimized());
         }
     }
-    
+
     class AllowNonOptimized : ManualConfig
     {
         public AllowNonOptimized()

@@ -1,9 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
-    <ProjectUISubcaption>Base Permissions Project</ProjectUISubcaption>
-  </PropertyGroup>
-  <ItemGroup>
-    <PackageReference Include="Loyc.Syntax" Version="26.2.0" />
-  </ItemGroup>
+    <PropertyGroup>
+        <TargetFramework>netcoreapp2.0</TargetFramework>
+        <ProjectUISubcaption>Base Permissions Project</ProjectUISubcaption>
+    </PropertyGroup>
+    <PropertyGroup>
+        <VersionPrefix>0.0.1</VersionPrefix>
+        <VersionSuffix>alpha</VersionSuffix>
+        <Description>Granular permissions management.</Description>
+        <PackageProjectUrl>https://github.com/lol768/GranularPermissions</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/lol768/GranularPermissions</RepositoryUrl>
+    </PropertyGroup>
+    <ItemGroup>
+        <PackageReference Include="Loyc.Syntax" Version="26.2.0"/>
+    </ItemGroup>
 </Project>

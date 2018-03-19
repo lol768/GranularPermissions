@@ -4,6 +4,13 @@
     <GenerateProgramFile>false</GenerateProgramFile>
     <ProjectUISubcaption>ASP.NET MVC Core Integration</ProjectUISubcaption>
   </PropertyGroup>
+  <PropertyGroup>
+    <VersionPrefix>0.0.1</VersionPrefix>
+    <VersionSuffix>alpha</VersionSuffix>
+    <Description>ASP.NET MVC Core integration for GranularPermissions.</Description>
+    <PackageProjectUrl>https://github.com/lol768/GranularPermissions</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/lol768/GranularPermissions</RepositoryUrl>
+  </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\GranularPermissions\GranularPermissions.csproj" />
   </ItemGroup>

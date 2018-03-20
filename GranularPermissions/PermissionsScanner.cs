@@ -20,7 +20,7 @@ namespace GranularPermissions
             while (stack.Any())
             {
                 var type = stack.Pop();
-                list.AddRange(type.GetFields().ToList().Where(f => f.IsStatic).Select(f => f.GetValue(null) as INode));
+                list.AddRange(type.GetFields().ToList().Where(f => f.IsStatic && !f.IsLiteral).Select(f => f.GetValue(null) as INode));
             }
             
             foreach (var node in list)

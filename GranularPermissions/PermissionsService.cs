@@ -37,7 +37,7 @@ namespace GranularPermissions
 
             ComputedChainDecision?.Invoke(this, new ComputedChainDecisionEventArgs
             (
-                tuple.Item2, chainName, identifier, tuple.Item1
+                tuple.Item2, chainName, identifier, tuple.Item1, permissionToCheck
             ));
 
             return tuple.Item1;

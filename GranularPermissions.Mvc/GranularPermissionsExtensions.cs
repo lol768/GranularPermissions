@@ -1,5 +1,6 @@
 ﻿using System;
 using GranularPermissions.Conditions;
+using GranularPermissions.Events;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace GranularPermissions.Mvc
@@ -13,7 +14,7 @@ namespace GranularPermissions.Mvc
             collection.AddScoped<IConditionEvaluator, ConditionEvaluator>();
             collection.AddScoped<IConditionParser, ConditionParser>();
             collection.AddScoped<IPermissionAuditLogCollector, PermissionAuditLogCollector>();
-            collection.AddSingleton<IPermissionsService>(sp =>
+            Func<IServiceProvider, PermissionsService> serviceBuilder = sp =>
             {
                 using (var scope = sp.CreateScope())
                 {
@@ -31,7 +32,9 @@ namespace GranularPermissions.Mvc
 
                     return instance;
                 }
-            });
+            };
+            collection.AddSingleton<IPermissionsService>(serviceBuilder);
+            collection.AddSingleton<IPermissionsEventBroadcaster>(serviceBuilder);
 
             return collection;
         }

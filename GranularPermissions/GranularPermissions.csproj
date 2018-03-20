@@ -4,7 +4,7 @@
         <ProjectUISubcaption>Base Permissions Project</ProjectUISubcaption>
     </PropertyGroup>
     <PropertyGroup>
-        <VersionPrefix>0.0.1</VersionPrefix>
+        <VersionPrefix>0.0.2</VersionPrefix>
         <VersionSuffix>alpha</VersionSuffix>
         <Description>Granular permissions management.</Description>
         <PackageProjectUrl>https://github.com/lol768/GranularPermissions</PackageProjectUrl>

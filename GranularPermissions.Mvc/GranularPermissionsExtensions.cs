@@ -15,19 +15,22 @@ namespace GranularPermissions.Mvc
             collection.AddScoped<IPermissionAuditLogCollector, PermissionAuditLogCollector>();
             collection.AddSingleton<IPermissionsService>(sp =>
             {
-                var dictionary = sp.GetService<IPermissionsScanner>().All(basePermissionsClass);
-                var parser = sp.GetService<IConditionParser>();
-                var evaluator = sp.GetService<IConditionEvaluator>();
-                var grantProvider = sp.GetService<IPermissionGrantProvider>();
-
-                var instance = new PermissionsService(parser, dictionary, evaluator);
-                var list = grantProvider.AllGrants();
-                foreach (var permissionGrant in list)
+                using (var scope = sp.CreateScope())
                 {
-                    instance.InsertSerialized(permissionGrant);
-                }
+                    var dictionary = scope.ServiceProvider.GetService<IPermissionsScanner>().All(basePermissionsClass);
+                    var parser = scope.ServiceProvider.GetService<IConditionParser>();
+                    var evaluator = scope.ServiceProvider.GetService<IConditionEvaluator>();
+                    var grantProvider = scope.ServiceProvider.GetService<IPermissionGrantProvider>();
 
-                return instance;
+                    var instance = new PermissionsService(parser, dictionary, evaluator);
+                    var list = grantProvider.AllGrants();
+                    foreach (var permissionGrant in list)
+                    {
+                        instance.InsertSerialized(permissionGrant);
+                    }
+
+                    return instance;
+                }
             });
 
             return collection;

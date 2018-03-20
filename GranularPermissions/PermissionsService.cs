@@ -30,7 +30,7 @@ namespace GranularPermissions
         {
             if (!Chains.ContainsKey(chainName))
             {
-                throw new ArgumentException("Invalid supplied permissions chain");
+                Chains[chainName] = new PermissionsChain(_evaluator);
             }
 
             var tuple = Chains[chainName].ResolvePermission(permissionToCheck, identifier, resource);

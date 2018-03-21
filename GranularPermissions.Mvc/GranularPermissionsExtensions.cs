@@ -34,6 +34,7 @@ namespace GranularPermissions.Mvc
                 }
             };
             collection.AddSingleton<IPermissionsService>(serviceBuilder);
+            
             // not pretty
             collection.AddSingleton<IPermissionsEventBroadcaster>(x => x.GetService<IPermissionsService>() as IPermissionsEventBroadcaster);
 

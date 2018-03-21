@@ -25,6 +25,17 @@ namespace GranularPermissions
             _evaluator = evaluator;
         }
 
+        public void ReplaceAllGrants(IEnumerable<IPermissionGrantSerialized> entries)
+        {
+            var tempDictionary = new ConcurrentDictionary<string, PermissionsChain>();
+            foreach (var permissionGrantSerialized in entries)
+            {
+                AddSerializedToDictionary(permissionGrantSerialized, tempDictionary);
+            }
+
+            Chains = tempDictionary;
+        }
+
         public PermissionResult GetResultUsingChain(string chainName, INode permissionToCheck, int identifier,
             IPermissionManaged resource = null)
         {
@@ -50,10 +61,17 @@ namespace GranularPermissions
 
         public void InsertSerialized(IPermissionGrantSerialized serialized)
         {
+            AddSerializedToDictionary(serialized, Chains);
+        }
+
+        private void AddSerializedToDictionary(IPermissionGrantSerialized serialized, IDictionary<string, PermissionsChain> dictionaryToUse)
+        {
             var chainName = serialized.PermissionChain;
             var identifier = serialized.Identifier;
 
-            var tableInstance = Chains.ContainsKey(chainName) ? Chains[chainName] : new PermissionsChain(_evaluator);
+            var tableInstance = dictionaryToUse.ContainsKey(chainName)
+                ? dictionaryToUse[chainName]
+                : new PermissionsChain(_evaluator);
             if (!_nodeDefinitions.ContainsKey(serialized.NodeKey))
             {
                 throw new ArgumentException("No such permission node in definition list");
@@ -61,7 +79,7 @@ namespace GranularPermissions
 
             var potentialNode = _nodeDefinitions[serialized.NodeKey];
 
-            Chains[chainName] = tableInstance;
+            dictionaryToUse[chainName] = tableInstance;
 
             if (serialized.PermissionType == PermissionType.Generic)
             {

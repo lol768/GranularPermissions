@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using GranularPermissions.Conditions;
 using GranularPermissions.Tests.Stubs;
 using NUnit.Framework;
@@ -44,6 +45,23 @@ namespace GranularPermissions.Tests
             sut.GetResultUsingChain(PermissionChainName, Permissions.Product.View, 1, new Product()).ShouldBe(PermissionResult.Allowed);
             
             sut.GetResultUsingChain(PermissionChainName, Permissions.Product.Buy, 1, new Product()).ShouldBe(PermissionResult.Unset);
+
+            var entries = new List<IPermissionGrantSerialized>()
+            {
+                new GrantStub
+                {
+                    ConditionCode = "false",
+                    GrantType = GrantType.Allow,
+                    Index = 1,
+                    NodeKey = Permissions.Product.View.Key,
+                    PermissionType = PermissionType.ResourceBound,
+                    Identifier = 1,
+                    PermissionChain = PermissionChainName
+                }
+            };
+            
+            sut.ReplaceAllGrants(entries);
+            sut.GetResultUsingChain(PermissionChainName, Permissions.Product.View, 1, new Product()).ShouldBe(PermissionResult.Unset);
         }
         
         [Test]

@@ -24,11 +24,15 @@ namespace GranularPermissions
                 ? _entries[identifier]
                 : new SortedList<int, IPermissionGrant>();
 
-            queue.Add(grant.Index, grant);
+            lock (queue)
+            {
+                queue.Add(grant.Index, grant);
+            }
             _entries[identifier] = queue;
         }
 
-        public (PermissionResult, IEnumerable<PermissionDecision>) ResolvePermission(INode nodeToResolve, int identifier, IPermissionManaged resource = null)
+        public (PermissionResult, IEnumerable<PermissionDecision>) ResolvePermission(INode nodeToResolve,
+            int identifier, IPermissionManaged resource = null)
         {
             var result = PermissionResult.Unset;
             var considered = new List<PermissionDecision>();
@@ -38,51 +42,55 @@ namespace GranularPermissions
             }
 
             var items = _entries[identifier];
-            
-            foreach (var keyValuePair in items.Where(kvp => kvp.Value.IsFor(nodeToResolve)))
+            lock (items)
             {
-                var grant = keyValuePair.Value;
-                if (grant.PermissionType == PermissionType.Generic)
+                foreach (var keyValuePair in items.Where(kvp => kvp.Value.IsFor(nodeToResolve)))
                 {
-                    switch (grant.GrantType)
+                    var grant = keyValuePair.Value;
+                    if (grant.PermissionType == PermissionType.Generic)
                     {
-                        case GrantType.Allow:
-                            result = PermissionResult.Allowed;
-                            break;
-                        case GrantType.Deny:
-                            result = PermissionResult.Denied;
-                            break;
-                    }
-                    considered.Add(new PermissionDecision(grant, result, true));
-                }
-                else
-                {
-                    var resourcedGrant = grant as ResourcedPermissionGrant<IPermissionManaged>;
-                    var conditionsSatisfied = true;
-                    if (resourcedGrant.Condition != null)
-                    {
-                        conditionsSatisfied = _evaluator.Evaluate(resource, resourcedGrant.Condition);
-                    }
+                        switch (grant.GrantType)
+                        {
+                            case GrantType.Allow:
+                                result = PermissionResult.Allowed;
+                                break;
+                            case GrantType.Deny:
+                                result = PermissionResult.Denied;
+                                break;
+                        }
 
-                    switch (grant.GrantType)
-                    {
-                        case GrantType.Allow when conditionsSatisfied:
-                            Console.WriteLine("Allowing due to satisfied conditions");
-                            result = PermissionResult.Allowed;
-                            considered.Add(new PermissionDecision(grant, result, conditionsSatisfied));
-                            break;
-                        case GrantType.Deny when conditionsSatisfied:
-                            Console.WriteLine("Denying due to satisfied conditions");
-                            result = PermissionResult.Denied;
-                            considered.Add(new PermissionDecision(grant, result, conditionsSatisfied));
-                            break;
-                        default:
-                            considered.Add(new PermissionDecision(grant, PermissionResult.Unset, conditionsSatisfied));
-                            break;
+                        considered.Add(new PermissionDecision(grant, result, true));
                     }
-                    
+                    else
+                    {
+                        var resourcedGrant = grant as ResourcedPermissionGrant<IPermissionManaged>;
+                        var conditionsSatisfied = true;
+                        if (resourcedGrant.Condition != null)
+                        {
+                            conditionsSatisfied = _evaluator.Evaluate(resource, resourcedGrant.Condition);
+                        }
+
+                        switch (grant.GrantType)
+                        {
+                            case GrantType.Allow when conditionsSatisfied:
+                                Console.WriteLine("Allowing due to satisfied conditions");
+                                result = PermissionResult.Allowed;
+                                considered.Add(new PermissionDecision(grant, result, conditionsSatisfied));
+                                break;
+                            case GrantType.Deny when conditionsSatisfied:
+                                Console.WriteLine("Denying due to satisfied conditions");
+                                result = PermissionResult.Denied;
+                                considered.Add(new PermissionDecision(grant, result, conditionsSatisfied));
+                                break;
+                            default:
+                                considered.Add(new PermissionDecision(grant, PermissionResult.Unset,
+                                    conditionsSatisfied));
+                                break;
+                        }
+                    }
                 }
             }
+
             return (result, considered);
         }
     }

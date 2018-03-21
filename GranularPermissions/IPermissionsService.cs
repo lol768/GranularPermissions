@@ -6,6 +6,8 @@ namespace GranularPermissions
     {
         void InsertSerialized(IPermissionGrantSerialized serialized);
 
+        void ReplaceAllGrants(IEnumerable<IPermissionGrantSerialized> entries);
+
         PermissionResult GetResultUsingChain(string chainName, INode permissionToCheck, int identifier,
             IPermissionManaged resource = null);
 

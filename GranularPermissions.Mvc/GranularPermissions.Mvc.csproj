@@ -5,7 +5,7 @@
     <ProjectUISubcaption>ASP.NET MVC Core Integration</ProjectUISubcaption>
   </PropertyGroup>
   <PropertyGroup>
-    <VersionPrefix>0.0.3</VersionPrefix>
+    <VersionPrefix>0.0.4</VersionPrefix>
     <VersionSuffix>alpha</VersionSuffix>
     <Description>ASP.NET MVC Core integration for GranularPermissions.</Description>
     <PackageProjectUrl>https://github.com/lol768/GranularPermissions</PackageProjectUrl>

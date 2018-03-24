@@ -3,5 +3,6 @@ mono: none
 dotnet: 2.1.101
 script:
   - dotnet restore
-  - dotnet test
+  - dotnet test GranularPermissions.Mvc.Tests
+  - dotnet test GranularPermissions.Tests
 

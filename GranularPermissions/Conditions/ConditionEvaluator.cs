@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Globalization;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Loyc.Syntax;
 
 namespace GranularPermissions.Conditions
@@ -67,6 +69,29 @@ namespace GranularPermissions.Conditions
                 var right = ResolveLiteral(args.Last()).Value;
 
                 return _factory.Literal(left.Equals(right));
+            };
+            
+            FunctionTable["'~="] = args =>
+            {
+                EnsureBinaryFunctionArguments(args);
+                var left = ResolveLiteral(args.First()).Value as string;
+                var right = ResolveLiteral(args.Last()).Value as string;
+
+                if (left == null || right == null)
+                {
+                    return _factory.Literal(false);
+                }
+
+                var result = false;
+                try
+                {
+                    result = Regex.IsMatch(left, right, RegexOptions.CultureInvariant, TimeSpan.FromSeconds(2));
+                }
+                catch (RegexMatchTimeoutException e)
+                {
+                    result = false;
+                }
+                return _factory.Literal(result);
             };
 
             FunctionTable["'!="] = args =>

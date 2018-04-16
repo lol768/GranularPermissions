@@ -80,10 +80,25 @@ namespace GranularPermissions.Tests
                 PermissionChain = PermissionChainName
             });
             
+            sut.InsertSerialized(new GrantStub
+            {
+                GrantType = GrantType.Allow,
+                Index = 1,
+                NodeKey = Permissions.Product.Buy.Key,
+                PermissionType = PermissionType.ResourceBound,
+                ConditionCode = "resource.Name ~= 'test_*'",
+                Identifier = 1,
+                PermissionChain = PermissionChainName
+            });
+            
             // We have an explicit grant, this should be true
             sut.GetResultUsingChain(PermissionChainName, Permissions.Product.Create, 1).ShouldBe(PermissionResult.Allowed);
             
-            sut.GetResultUsingChain(PermissionChainName, Permissions.Product.Buy, 1, new Product()).ShouldBe(PermissionResult.Unset);
+            sut.GetResultUsingChain(PermissionChainName, Permissions.Product.Buy, 1, new Product
+            {
+                Name = "test_product",
+                Price = 5d
+            }).ShouldBe(PermissionResult.Allowed);
         }
         
         [Test]

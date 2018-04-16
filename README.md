@@ -1,6 +1,6 @@
 # GranularPermissions
 
-![Build status](https://api.travis-ci.org/lol768/GranularPermissions.svg?branch=master)
+[![Build status](https://api.travis-ci.org/lol768/GranularPermissions.svg?branch=master)](https://travis-ci.org/lol768/GranularPermissions)
 
 The world's most over-engineered permissions system.
 
@@ -46,7 +46,7 @@ You could write some conditions for a resource bound grant on node `Cat.Adopt`:
 
 `resource.Age != 5`
 
-Supported operators: `<=`, `>=`, `<`, `>`, `&&`, `||`, `.`, `==`, `!=`, `!`
+Supported operators: `<=`, `>=`, `<`, `>`, `&&`, `||`, `.`, `==`, `!=`, `!`, `~=` (regex)
 
 ## Usage
 

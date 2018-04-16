@@ -39,7 +39,13 @@ namespace GranularPermissions
 
         public override string ToString()
         {
-            return $"PermissionGrant[{GrantType}, on {UnderlyingNode} with {Condition.Print()}]";
+            if (Condition != null)
+            {
+                return $"PermissionGrant[{GrantType}, on {UnderlyingNode} with {Condition.Print()}]";
+            }
+            
+            return $"PermissionGrant[{GrantType}, on {UnderlyingNode} with no condition]";
+
         }
 
         public int CompareTo(IPermissionGrant other)

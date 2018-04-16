@@ -132,6 +132,38 @@ namespace GranularPermissions.Tests
             Assert.That(del, Throws.TypeOf<ArgumentException>());
         }
         
+        [Test]
+        public void TestDuplicateIndexes()
+        {
+            var evaluator = new ConditionEvaluator();
+
+            var sut = new PermissionsService(new ConditionParser(), (new PermissionsScanner().All(typeof(Permissions))), evaluator);
+            sut.InsertSerialized(new GrantStub
+            {
+                GrantType = GrantType.Allow,
+                Index = 1,
+                NodeKey = Permissions.Product.Create.Key,
+                PermissionType = PermissionType.Generic,
+                Identifier = 1,
+                PermissionChain = PermissionChainName
+            });
+            
+            sut.InsertSerialized(new GrantStub
+            {
+                GrantType = GrantType.Allow,
+                Index = 1,
+                NodeKey = Permissions.Product.Buy.Key,
+                PermissionType = PermissionType.ResourceBound,
+                Identifier = 1,
+                PermissionChain = PermissionChainName
+            });
+            
+            sut.GetResultUsingChain(PermissionChainName, Permissions.Product.Create, 1).ShouldBe(PermissionResult.Allowed);
+            sut.GetResultUsingChain(PermissionChainName, Permissions.Product.Buy, 1).ShouldBe(PermissionResult.Allowed);
+
+            
+        }
+        
         
     }
 }

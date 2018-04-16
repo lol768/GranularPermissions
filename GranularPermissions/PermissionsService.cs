@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using GranularPermissions.Conditions;
 using GranularPermissions.Events;
+using Loyc.Syntax;
 
 namespace GranularPermissions
 {
@@ -102,9 +103,13 @@ namespace GranularPermissions
                     $"Mismatch in resource/generic node type, was expecting resource bound for {serialized.NodeKey}");
             }
 
-            var compiled = _parser.ParseConditionCode(serialized.ConditionCode);
+            LNode node = null;
+            if (!string.IsNullOrEmpty(serialized.ConditionCode))
+            {
+                node = _parser.ParseConditionCode(serialized.ConditionCode);
+            }
             var resourcedToAdd = new ResourcedPermissionGrant<IPermissionManaged>(
-                serialized.GrantType, (IResourceNode) potentialNode, compiled, serialized.Index
+                serialized.GrantType, (IResourceNode) potentialNode, node, serialized.Index
             );
 
             tableInstance.Insert(resourcedToAdd, identifier);

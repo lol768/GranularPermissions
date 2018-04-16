@@ -22,7 +22,7 @@ namespace GranularPermissions
         {
             var queue = _entries.ContainsKey(identifier)
                 ? _entries[identifier]
-                : new SortedList<int, IPermissionGrant>();
+                : new SortedList<int, IPermissionGrant>(new IndexComparer<int>());
 
             lock (queue)
             {
@@ -92,6 +92,17 @@ namespace GranularPermissions
             }
 
             return (result, considered);
+        }
+        
+        class IndexComparer<TKey> : IComparer<TKey> where TKey : IComparable
+        {
+            public int Compare(TKey x, TKey y)
+            {
+                if (x == null || y == null) return 1;
+                var result = x.CompareTo(y);
+
+                return result == 0 ? 1 : result;
+            }
         }
     }
 }

@@ -1,4 +1,7 @@
 # GranularPermissions
+
+![Build status](https://api.travis-ci.org/lol768/GranularPermissions.svg?branch=master)
+
 The world's most over-engineered permissions system.
 
 ## Features
@@ -47,7 +50,7 @@ Supported operators: `<=`, `>=`, `<`, `>`, `&&`, `||`, `.`, `==`, `!=`, `!`
 
 ## Usage
 
-From a ASP.NET MVC Core project, in `ConfigureServices` in `Startup.cs`:
+From an ASP.NET MVC Core project, in `ConfigureServices` in `Startup.cs`:
 
 ```csharp
 services.AddScoped<IPermissionGrantProvider, SomePermissionGrantProvider>();
@@ -85,3 +88,26 @@ public static class Permissions
     }
 }
 ```
+
+To check a permission within a specified chain, call `GetResultUsingChain` on the `IPermissionsService` instance which will return a `PermissionResult` (Unset, Allow or Deny).
+
+It is possible to reload the grants at runtime by calling `ReplaceAllGrants` with a new `IEnumerable<IPermissionGrantSerialized>`.
+
+## Example use-case
+
+A web application has two groups which have different levels of access. Group 1 is for "Everyone" and includes a basic level of permission grants. Group 2, "Administrators" includes a higher level of access for a subset of application users who are in this group.
+
+Within GranularPermissions, you'd have:
+
+* One chain, `"Groups"`
+* A set of `IPermissionGrantSerialized` for the "Groups" chain with Identifier=1. These will apply to all users in the _Everyone_ group.
+* A set of `IPermissionGrantSerialized` for the "Groups" chain with Identifier=2. These will apply to all users in the _Administrators_ group.
+* Some `IPermissionGrantProvider` which returns the aforementioned `IPermissionGrantSerialized` instances from DB
+
+A simple permissions checker would call `GetResultUsingChain("Groups", Permissions.Node.ToCheck, groupId)` for each of the user's groups and then aggregate the results to come up with a final allowed/denied result. For example, the administrators group may be considered a higher priority than the everyone group.
+
+For resource bound nodes, it's simply a case of passing an additional argument `GetResultUsingChain("Groups", Permissions.Node.ToCheckWithResource, groupId, resourceToCheckAgainst)`.
+
+## TODO
+
+* Add ability to register DSL functions/identifiers

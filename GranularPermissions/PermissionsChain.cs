@@ -73,12 +73,10 @@ namespace GranularPermissions
                         switch (grant.GrantType)
                         {
                             case GrantType.Allow when conditionsSatisfied:
-                                Console.WriteLine("Allowing due to satisfied conditions");
                                 result = PermissionResult.Allowed;
                                 considered.Add(new PermissionDecision(grant, result, conditionsSatisfied));
                                 break;
                             case GrantType.Deny when conditionsSatisfied:
-                                Console.WriteLine("Denying due to satisfied conditions");
                                 result = PermissionResult.Denied;
                                 considered.Add(new PermissionDecision(grant, result, conditionsSatisfied));
                                 break;

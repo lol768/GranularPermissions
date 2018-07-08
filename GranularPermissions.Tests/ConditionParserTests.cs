@@ -19,7 +19,7 @@ namespace GranularPermissions.Tests
             var sut = new ConditionEvaluator();
             sut.Evaluate(null, Les2LanguageService.Value.ParseSingle("0 < 1")).ShouldBe(true);
         }
-        
+
         [Test]
         public void TestLogic()
         {
@@ -28,7 +28,7 @@ namespace GranularPermissions.Tests
             sut.Evaluate(null, Les2LanguageService.Value.ParseSingle("true && true")).ShouldBe(true);
             sut.Evaluate(null, Les2LanguageService.Value.ParseSingle("true && false")).ShouldBe(false);
             sut.Evaluate(null, Les2LanguageService.Value.ParseSingle("false && false")).ShouldBe(false);
-            
+
             sut.Evaluate(null, Les2LanguageService.Value.ParseSingle("false || true")).ShouldBe(true);
             sut.Evaluate(null, Les2LanguageService.Value.ParseSingle("true || true")).ShouldBe(true);
             sut.Evaluate(null, Les2LanguageService.Value.ParseSingle("true || false")).ShouldBe(true);
@@ -42,10 +42,10 @@ namespace GranularPermissions.Tests
         {
             // arrange
             var sut = new ConditionEvaluator();
-            
+
             // act (ish)
             ActualValueDelegate<bool> del = () => sut.Evaluate(null, Les2LanguageService.Value.ParseSingle("!5"));
-            
+
             // assert
             Assert.That(del, Throws.TypeOf<InvalidOperationException>());
         }
@@ -62,8 +62,26 @@ namespace GranularPermissions.Tests
                     CategoryId = 5
                 }
             };
-            
-            sut.Evaluate(product, Les2LanguageService.Value.ParseSingle("resource.Category.CategoryId == 5")).ShouldBe(true);
+
+            sut.Evaluate(product, Les2LanguageService.Value.ParseSingle("resource.Category.CategoryId == 5"))
+                .ShouldBe(true);
+        }
+
+        [Test]
+        public void TestMultiplePropertyReferences()
+        {
+            var sut = new ConditionEvaluator();
+            var product = new Product
+            {
+                Name = "Huel",
+                Category = new Category
+                {
+                    CategoryId = 5
+                }
+            };
+
+            sut.Evaluate(product, Les2LanguageService.Value.ParseSingle("resource.Category.CategoryId == 5 || resource.Category.CategoryId == 6 || resource.Category.CategoryId == 7 || resource.Category.CategoryId == 7 || resource.Category.CategoryId == 7 || resource.Category.CategoryId == 7 || resource.Category.CategoryId == 7 || resource.Category.CategoryId == 7 || resource.Category.CategoryId == 7 || resource.Category.CategoryId == 7 || resource.Category.CategoryId == 7 || resource.Category.CategoryId == 7 || resource.Category.CategoryId == 7"))
+                .ShouldBe(true);
         }
 
         [Test]
@@ -88,10 +106,9 @@ namespace GranularPermissions.Tests
             }
 
             code.Append(@".Name == ""Huel""");
-            ActualValueDelegate<bool> del = () => sut.Evaluate(product, Les2LanguageService.Value.ParseSingle(code.ToString()));
+            ActualValueDelegate<bool> del = () =>
+                sut.Evaluate(product, Les2LanguageService.Value.ParseSingle(code.ToString()));
             Assert.That(del, Throws.TypeOf<StackOverflowException>());
         }
-
     }
-
 }

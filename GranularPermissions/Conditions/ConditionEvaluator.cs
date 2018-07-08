@@ -16,66 +16,66 @@ namespace GranularPermissions.Conditions
     public class ConditionEvaluator : IConditionEvaluator
     {
         private const string ResourceIdentifierName = "resource";
+        private const int StackOverflowLimit = 100;
         private IDictionary<string, Func<object>> IdentifierTable = new Dictionary<string, Func<object>>();
 
-        private IDictionary<string, Func<ICollection<LNode>, LNode>> FunctionTable =
-            new Dictionary<string, Func<ICollection<LNode>, LNode>>();
+        private IDictionary<string, Func<ICollection<LNode>, int, LNode>> FunctionTable =
+            new Dictionary<string, Func<ICollection<LNode>, int, LNode>>();
 
         private LNodeFactory _factory;
-        private int _stackOverflowLimit;
 
         public ConditionEvaluator()
         {
-            FunctionTable["'&&"] = args =>
+            FunctionTable["'&&"] = (args, sLimit) =>
             {
                 return _factory.Literal(args.Aggregate(true,
-                    (current, arg) => current & (bool) ResolveLiteral(arg).Value));
+                    (current, arg) => current & (bool) ResolveLiteral(arg, sLimit).Value));
             };
 
-            FunctionTable["'||"] = args =>
+            FunctionTable["'||"] = (args, sLimit) =>
             {
                 return _factory.Literal(args.Aggregate(false,
-                    (current, arg) => current | (bool) ResolveLiteral(arg).Value));
+                    (current, arg) => current | (bool) ResolveLiteral(arg, sLimit).Value));
             };
 
-            FunctionTable["'>"] = args =>
+            FunctionTable["'>"] = (args, sLimit) =>
             {
-                var tuple = GetComparableArguments(args);
+                var tuple = GetComparableArguments(args, sLimit);
                 return _factory.Literal(tuple.Item1.CompareTo(tuple.Item2) > 0);
             };
 
-            FunctionTable["'<"] = args =>
+            FunctionTable["'<"] = (args, sLimit) =>
             {
-                var tuple = GetComparableArguments(args);
+                var tuple = GetComparableArguments(args, sLimit);
                 return _factory.Literal(tuple.Item1.CompareTo(tuple.Item2) < 0);
             };
 
-            FunctionTable["'>="] = args =>
+            FunctionTable["'>="] = (args, sLimit) =>
             {
-                var tuple = GetComparableArguments(args);
+                var tuple = GetComparableArguments(args, sLimit);
                 return _factory.Literal(tuple.Item1.CompareTo(tuple.Item2) >= 0);
             };
 
-            FunctionTable["'<="] = args =>
+            FunctionTable["'<="] = (args, sLimit) =>
             {
-                var tuple = GetComparableArguments(args);
+                var tuple = GetComparableArguments(args, sLimit);
                 return _factory.Literal(tuple.Item1.CompareTo(tuple.Item2) <= 0);
             };
 
-            FunctionTable["'=="] = args =>
+            FunctionTable["'=="] = (args, sLimit) =>
             {
                 EnsureBinaryFunctionArguments(args);
-                var left = ResolveLiteral(args.First()).Value;
-                var right = ResolveLiteral(args.Last()).Value;
+                var left = ResolveLiteral(args.First(), sLimit).Value;
+                var right = ResolveLiteral(args.Last(), sLimit).Value;
 
                 return _factory.Literal(left.Equals(right));
             };
             
-            FunctionTable["'~="] = args =>
+            FunctionTable["'~="] = (args, sLimit) =>
             {
                 EnsureBinaryFunctionArguments(args);
-                var left = ResolveLiteral(args.First()).Value as string;
-                var right = ResolveLiteral(args.Last()).Value as string;
+                var left = ResolveLiteral(args.First(), sLimit).Value as string;
+                var right = ResolveLiteral(args.Last(), sLimit).Value as string;
 
                 if (left == null || right == null)
                 {
@@ -94,19 +94,19 @@ namespace GranularPermissions.Conditions
                 return _factory.Literal(result);
             };
 
-            FunctionTable["'!="] = args =>
+            FunctionTable["'!="] = (args, sLimit) =>
             {
                 EnsureBinaryFunctionArguments(args);
-                var left = ResolveLiteral(args.First()).Value;
-                var right = ResolveLiteral(args.Last()).Value;
+                var left = ResolveLiteral(args.First(), sLimit).Value;
+                var right = ResolveLiteral(args.Last(), sLimit).Value;
 
                 return _factory.Literal(!left.Equals(right));
             };
 
-            FunctionTable["'!"] = args =>
+            FunctionTable["'!"] = (args, sLimit) =>
             {
                 EnsureSingleFunctionArgument(args);
-                var operand = ResolveLiteral(args.First()).Value;
+                var operand = ResolveLiteral(args.First(), sLimit).Value;
                 if (!(operand is bool))
                 {
                     throw new InvalidOperationException("Attempt to negate a non-boolean value. This is not JavaScript.");
@@ -114,11 +114,11 @@ namespace GranularPermissions.Conditions
                 return _factory.Literal(!((bool)operand));
             };
 
-            FunctionTable["'."] = args =>
+            FunctionTable["'."] = (args, sLimit) =>
             {
                 EnsureBinaryFunctionArguments(args);
 
-                var literalLeft = ResolveLiteral(args.First()).Value;
+                var literalLeft = ResolveLiteral(args.First(), sLimit).Value;
                 var identifierRight = (args.Last()).Name.Name;
 
                 if (literalLeft.GetType().GetProperty(identifierRight) != null)
@@ -128,24 +128,22 @@ namespace GranularPermissions.Conditions
 
                 if (literalLeft.GetType().GetMethod(identifierRight) != null)
                 {
-                    throw new ArgumentException("Method calls prohibted due to RCE risk.");
+                    throw new ArgumentException("Method calls prohibited due to RCE risk.");
                 }
 
                 throw new ArgumentException(
                     $"Couldn't find a {identifierRight} on the provided {literalLeft.GetType().Name}");
             };
 
-            IdentifierTable["isOwned"] = () => true;
-
             IdentifierTable["true"] = () => true;
             IdentifierTable["false"] = () => false;
         }
 
-        private (IComparable, IComparable) GetComparableArguments(ICollection<LNode> args)
+        private (IComparable, IComparable) GetComparableArguments(ICollection<LNode> args, int sLimit)
         {
             EnsureBinaryFunctionArguments(args);
-            var left = ResolveLiteral(args.First()).Value as IComparable;
-            var right = ResolveLiteral(args.Last()).Value as IComparable;
+            var left = ResolveLiteral(args.First(), sLimit).Value as IComparable;
+            var right = ResolveLiteral(args.Last(), sLimit).Value as IComparable;
             if (left == null || right == null)
             {
                 throw new ArgumentException("Arguments are not comparable!");
@@ -172,16 +170,15 @@ namespace GranularPermissions.Conditions
             }
         }
 
-        private LiteralNode ResolveLiteral(LNode input)
+        private LiteralNode ResolveLiteral(LNode input, int stackOverflowLimit = StackOverflowLimit)
         {
-            while (_stackOverflowLimit > 0)
+            if ((--stackOverflowLimit) <= 0)
             {
-                _stackOverflowLimit--;
-                if (input.IsLiteral)
-                {
-                    return input as LiteralNode;
-                }
-
+                throw new StackOverflowException("'Stack overflow' whilst evaluating permission condition");
+            }
+            
+            while (!input.IsLiteral)
+            {
                 if (input.IsId)
                 {
                     if (IdentifierTable.ContainsKey(input.Name.Name))
@@ -198,7 +195,7 @@ namespace GranularPermissions.Conditions
                 {
                     if (FunctionTable.ContainsKey(input.Name.Name))
                     {
-                        input = FunctionTable[input.Name.Name](input.Args);
+                        input = FunctionTable[input.Name.Name](input.Args, stackOverflowLimit);
                         continue;
                     }
 
@@ -208,8 +205,8 @@ namespace GranularPermissions.Conditions
 
                 throw new ArgumentException("Cannot resolve a " + input.Kind);
             }
-
-            throw new StackOverflowException("'Stack overflow' whilst evaluating permission condition");
+            
+            return input as LiteralNode;
         }
 
         public bool Evaluate(IPermissionManaged resource, LNode parsedNode)
@@ -217,8 +214,6 @@ namespace GranularPermissions.Conditions
             lock (IdentifierTable)
             {
                 _factory = new LNodeFactory(parsedNode.Source);
-                _stackOverflowLimit = 10;
-
                 IdentifierTable[ResourceIdentifierName] = () => resource;
                 var result = ResolveLiteral(parsedNode);
                 return (bool) result.Value;

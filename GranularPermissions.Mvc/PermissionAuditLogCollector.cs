@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using GranularPermissions.Events;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Filters;
@@ -11,8 +12,9 @@ namespace GranularPermissions.Mvc
     {
         private readonly IHostingEnvironment _env;
 
-        public ICollection<ComputedChainDecisionEventArgs> LoggedEvents { get; } =
-            new List<ComputedChainDecisionEventArgs>();
+        public ICollection<ComputedChainDecisionEventArgs> LoggedEvents => _backingField.GetRange(0, _backingField.Count);
+
+        private readonly List<ComputedChainDecisionEventArgs> _backingField = new List<ComputedChainDecisionEventArgs>();
 
         public PermissionAuditLogCollector(IPermissionsEventBroadcaster broadcaster, IHostingEnvironment env)
         {
@@ -25,7 +27,7 @@ namespace GranularPermissions.Mvc
 
         private void OnComputedChainDecision(object sender, ComputedChainDecisionEventArgs e)
         {
-            LoggedEvents.Add(e);
+            _backingField.Add(e);
         }
     }
 }

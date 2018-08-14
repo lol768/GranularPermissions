@@ -15,5 +15,11 @@
     {
         public int CategoryId { get; set; }
         public Product ProductReference { get; set; }
+        public CategoryType Type { get; set; }
+    }
+
+    public enum CategoryType
+    {
+        Product, Subscription
     }
 }

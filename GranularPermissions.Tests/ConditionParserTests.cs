@@ -83,6 +83,24 @@ namespace GranularPermissions.Tests
             sut.Evaluate(product, Les2LanguageService.Value.ParseSingle("resource.Category.CategoryId == 5 || resource.Category.CategoryId == 6 || resource.Category.CategoryId == 7 || resource.Category.CategoryId == 7 || resource.Category.CategoryId == 7 || resource.Category.CategoryId == 7 || resource.Category.CategoryId == 7 || resource.Category.CategoryId == 7 || resource.Category.CategoryId == 7 || resource.Category.CategoryId == 7 || resource.Category.CategoryId == 7 || resource.Category.CategoryId == 7 || resource.Category.CategoryId == 7"))
                 .ShouldBe(true);
         }
+        
+        [Test]
+        public void TestEnum()
+        {
+            var sut = new ConditionEvaluator();
+            var product = new Product
+            {
+                Name = "Huel",
+                Category = new Category
+                {
+                    CategoryId = 5,
+                    Type = CategoryType.Product
+                }
+            };
+
+            sut.Evaluate(product, Les2LanguageService.Value.ParseSingle("resource.Category.Type == 'Product'"))
+                .ShouldBe(true);
+        }
 
         [Test]
         public void TestStackOverflow()

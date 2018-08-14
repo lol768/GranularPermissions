@@ -205,6 +205,11 @@ namespace GranularPermissions.Conditions
 
                 throw new ArgumentException("Cannot resolve a " + input.Kind);
             }
+
+            if (input.HasValue && input.Value.GetType().IsEnum)
+            {
+                input = _factory.Literal(input.Value.ToString());
+            }
             
             return input as LiteralNode;
         }

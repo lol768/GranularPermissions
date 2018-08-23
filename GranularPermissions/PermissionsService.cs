@@ -75,7 +75,7 @@ namespace GranularPermissions
                 : new PermissionsChain(_evaluator);
             if (!_nodeDefinitions.ContainsKey(serialized.NodeKey))
             {
-                throw new ArgumentException("No such permission node in definition list");
+                throw new ArgumentException("No such permission node " + serialized.NodeKey + " in definition list");
             }
 
             var potentialNode = _nodeDefinitions[serialized.NodeKey];

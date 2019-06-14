@@ -4,6 +4,8 @@
 
 The world's most over-engineered permissions system.
 
+Supports netcoreapp2.2 and ASP.NET MVC Core 2.2.
+
 ## Features
 
 * Generic nodes (not tied to a resource)

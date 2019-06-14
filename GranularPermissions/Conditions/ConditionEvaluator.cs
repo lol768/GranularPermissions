@@ -87,7 +87,7 @@ namespace GranularPermissions.Conditions
                 {
                     result = Regex.IsMatch(left, right, RegexOptions.CultureInvariant, TimeSpan.FromSeconds(2));
                 }
-                catch (RegexMatchTimeoutException e)
+                catch (RegexMatchTimeoutException)
                 {
                     result = false;
                 }

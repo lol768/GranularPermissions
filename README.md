@@ -1,10 +1,10 @@
 # GranularPermissions
 
-[![Build status](https://api.travis-ci.org/lol768/GranularPermissions.svg?branch=master)](https://travis-ci.org/lol768/GranularPermissions)
+[![Build status](https://github.com/lol768/GranularPermissions/actions/workflows/dotnet.yml/badge.svg)](https://github.com/lol768/GranularPermissions/actions)
 
 The world's most over-engineered permissions system.
 
-Supports netcoreapp2.2 and ASP.NET MVC Core 2.2.
+Supports net5.0.
 
 ## Features
 

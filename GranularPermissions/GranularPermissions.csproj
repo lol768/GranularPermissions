@@ -1,10 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFramework>netcoreapp2.2</TargetFramework>
+        <TargetFramework>net5.0</TargetFramework>
         <ProjectUISubcaption>Base Permissions Project</ProjectUISubcaption>
     </PropertyGroup>
     <PropertyGroup>
-        <VersionPrefix>1.0.3</VersionPrefix>
+        <VersionPrefix>1.0.5</VersionPrefix>
         <Description>Granular permissions management.</Description>
         <PackageProjectUrl>https://github.com/lol768/GranularPermissions</PackageProjectUrl>
         <PackageLicenseExpression>GPL-3.0-only</PackageLicenseExpression>

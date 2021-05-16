@@ -1,13 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
     <GenerateProgramFile>false</GenerateProgramFile>
-    <ProjectUISubcaption>ASP.NET MVC Core Integration</ProjectUISubcaption>
+    <ProjectUISubcaption>ASP.NET Core MVC Integration</ProjectUISubcaption>
   </PropertyGroup>
   <PropertyGroup>
-    <VersionPrefix>1.0.1</VersionPrefix>
-    <VersionSuffix>beta</VersionSuffix>
-    <Description>ASP.NET MVC Core integration for GranularPermissions.</Description>
+    <VersionPrefix>1.0.5</VersionPrefix>
+    <Description>ASP.NET Core MVC integration for GranularPermissions.</Description>
     <PackageProjectUrl>https://github.com/lol768/GranularPermissions</PackageProjectUrl>
     <PackageLicenseExpression>GPL-3.0-only</PackageLicenseExpression>
     <RepositoryUrl>https://github.com/lol768/GranularPermissions</RepositoryUrl>
@@ -16,7 +15,7 @@
     <ProjectReference Include="..\GranularPermissions\GranularPermissions.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore" Version="2.2.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Abstractions" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="5.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="5.0.0" />
   </ItemGroup>
 </Project>

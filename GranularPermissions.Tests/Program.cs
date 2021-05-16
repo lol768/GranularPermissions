@@ -22,12 +22,12 @@ namespace GranularPermissions
     {
         public AllowNonOptimized()
         {
-            Add(JitOptimizationsValidator.DontFailOnError); // ALLOW NON-OPTIMIZED DLLS
-            Add(CsvMeasurementsExporter.Default);
-            Add(RPlotExporter.Default);
-            Add(DefaultConfig.Instance.GetLoggers().ToArray()); // manual config has no loggers by default
-            Add(DefaultConfig.Instance.GetExporters().ToArray()); // manual config has no exporters by default
-            Add(DefaultConfig.Instance.GetColumnProviders().ToArray()); // manual config has no columns by default
+            AddValidator(JitOptimizationsValidator.DontFailOnError); // ALLOW NON-OPTIMIZED DLLS
+            AddExporter(CsvMeasurementsExporter.Default);
+            AddExporter(RPlotExporter.Default);
+            AddLogger(DefaultConfig.Instance.GetLoggers().ToArray()); // manual config has no loggers by default
+            AddExporter(DefaultConfig.Instance.GetExporters().ToArray()); // manual config has no exporters by default
+            AddColumnProvider(DefaultConfig.Instance.GetColumnProviders().ToArray()); // manual config has no columns by default
         }
     }
 }

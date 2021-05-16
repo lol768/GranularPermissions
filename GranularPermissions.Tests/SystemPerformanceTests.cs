@@ -1,13 +1,9 @@
 ﻿using BenchmarkDotNet.Attributes;
-using BenchmarkDotNet.Attributes.Columns;
-using BenchmarkDotNet.Attributes.Exporters;
-using BenchmarkDotNet.Attributes.Jobs;
 using GranularPermissions.Conditions;
 using GranularPermissions.Tests.Stubs;
 
 namespace GranularPermissions.Tests
 {
-    [CoreJob]
     [RPlotExporter, RankColumn]
     public class SystemPerformanceTests
     {
